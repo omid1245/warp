@@ -39,3 +39,8 @@ jobs:
           except Exception as e:
               print("Error:", e)
           '
+              print(key)
+              print("="*40 + "\n")
+          except Exception as e:
+              print("Error:", e)
+          '
