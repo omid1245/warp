@@ -43,4 +43,4 @@ try:
         print("=" * 40 + "\n")
 except Exception as e:
     print(f"Error executing API request: {e}")
-  
+    
