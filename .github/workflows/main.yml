@@ -17,13 +17,4 @@ jobs:
 
       - name: Run script
         run: python script.py
-              print(key)
-              print("="*40 + "\n")
-          except Exception as e:
-              print("Error:", e)
-          '
-              print(key)
-              print("="*40 + "\n")
-          except Exception as e:
-              print("Error:", e)
-          '
+        
