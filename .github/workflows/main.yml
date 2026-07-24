@@ -1,4 +1,4 @@
-name: WARP Plus Key Generator
+name: WARP Key Generator
 
 on:
   workflow_dispatch:
@@ -10,25 +10,32 @@ jobs:
       - name: Generate WARP Key
         run: |
           python3 -c '
-          import urllib.request
-          import json
-          import datetime
-          import random
-          import string
+          import urllib.request, json, datetime, random, string
 
-          def gen_string(length):
-              return "".join(random.choice(string.ascii_letters + string.digits) for _ in range(length))
+          def gen_str(l):
+              return "".join(random.choice(string.ascii_letters + string.digits) for _ in range(l))
 
           url = "https://api.cloudflareclient.com/v0a1925/reg"
-          body = {"install_id": gen_string(22), "fcm_token": f"{gen_string(22)}:APA91b{gen_string(134)}", "tos": datetime.datetime.now().isoformat()[:-3] + "+07:00", "model": "Android", "type": "Android", "locale": "en_US"}
+          body = {
+              "install_id": gen_str(22),
+              "fcm_token": f"{gen_str(22)}:APA91b{gen_str(134)}",
+              "tos": datetime.datetime.now().isoformat()[:-3] + "+07:00",
+              "model": "Android",
+              "type": "Android",
+              "locale": "en_US"
+          }
           data = json.dumps(body).encode("utf-8")
           headers = {"Content-Type": "application/json; charset=UTF-8", "User-Agent": "okhttp/3.12.1"}
-          req = urllib.request.Request(url, data=data, headers=headers)
-          res = urllib.request.urlopen(req)
-          res_json = json.loads(res.read().decode("utf-8"))
-          key = res_json["account"]["license"]
-          print("\n" + "="*40)
-          print("SUCCESS! YOUR WARP+ KEY IS:")
-          print(key)
-          print("="*40 + "\n")
+          
+          try:
+              req = urllib.request.Request(url, data=data, headers=headers)
+              res = urllib.request.urlopen(req)
+              res_json = json.loads(res.read().decode("utf-8"))
+              key = res_json["account"]["license"]
+              print("\n" + "="*40)
+              print("SUCCESS! YOUR WARP+ KEY IS:")
+              print(key)
+              print("="*40 + "\n")
+          except Exception as e:
+              print("Error:", e)
           '
