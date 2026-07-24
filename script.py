@@ -1,53 +1,68 @@
 import datetime
 import json
-import urllib.request
+import random
+import string
 import ssl
+import urllib.request
+import urllib.error
 
-ctx = ssl.create_default_context()
-ctx.check_hostname = False
-ctx.verify_mode = ssl.CERT_NONE
 
-url = "https://api.cloudflareclient.com/v0a2158/reg"
+def gen_str(length):
+    return "".join(
+        random.choice(string.ascii_letters + string.digits)
+        for _ in range(length)
+    )
 
-headers = {
-    "User-Agent": "okhttp/3.12.1",
-    "Content-Type": "application/json; charset=UTF-8",
-    "Host": "api.cloudflareclient.com",
-    "Connection": "Keep-Alive",
-    "Accept-Encoding": "gzip",
-}
 
-body = {
-    "install_id": "",
-    "fcm_token": "",
-    "tos": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z"),
-    "model": "Android",
-    "type": "Android",
-    "locale": "en_US",
-}
+def run():
+    url = "https://api.cloudflareclient.com/v0a2158/reg"
 
-req = urllib.request.Request(url, data=json.dumps(body).encode('utf-8'), headers=headers)
+    install_id = gen_str(22)
+    fcm_token = f"{gen_str(22)}:APA91b{gen_str(134)}"
 
-try:
-    with urllib.request.urlopen(req, context=ctx) as response:
-        res = json.loads(response.read().decode('utf-8'))
-        account_id = res["id"]
-        token = res["token"]
-        license_key = res["account"]["license"]
-        
-        print("\n" + "="*40)
-        print("SUCCESS! YOUR WARP KEY IS:")
-        print(license_key)
-        print("="*40 + "\n")
-except Exception as e:
-    print(f"Error: {e}")
-    with urllib.request.urlopen(req) as response:
-        res_json = json.loads(response.read().decode("utf-8"))
-        key = res_json.get("account", {}).get("license", "نامشخص")
-        print("\n" + "=" * 40)
-        print("SUCCESS! YOUR WARP+ KEY IS:")
-        print(key)
-        print("=" * 40 + "\n")
-except Exception as e:
-    print(f"Error executing API request: {e}")
-    
+    body = {
+        "install_id": install_id,
+        "fcm_token": fcm_token,
+        "tos": datetime.datetime.now(datetime.timezone.utc).strftime(
+            "%Y-%m-%dT%H:%M:%S.000Z"
+        ),
+        "model": "Android",
+        "type": "Android",
+        "locale": "en_US",
+    }
+
+    headers = {
+        "Content-Type": "application/json; charset=UTF-8",
+        "User-Agent": "okhttp/3.12.1",
+        "Host": "api.cloudflareclient.com",
+    }
+
+    req = urllib.request.Request(
+        url, data=json.dumps(body).encode("utf-8"), headers=headers
+    )
+
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+
+    try:
+        with urllib.request.urlopen(req, context=ctx) as response:
+            res = json.loads(response.read().decode("utf-8"))
+            key = res.get("account", {}).get("license", "یافت نشد")
+            print("\n" + "=" * 40)
+            print("SUCCESS! YOUR WARP KEY IS:")
+            print(key)
+            print("=" * 40 + "\n")
+    except urllib.error.HTTPError as e:
+        print(f"\n[HTTP Error {e.code}]: {e.reason}")
+        try:
+            err_body = e.read().decode("utf-8")
+            print(f"Cloudflare Response: {err_body}")
+        except Exception:
+            pass
+    except Exception as e:
+        print(f"\n[Error]: {e}")
+
+
+if __name__ == "__main__":
+    run()
